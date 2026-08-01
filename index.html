@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pakistan Rising 3D Card | 14 August Mubarak</title>
+    <style>
+        :root {
+            --bg-dark: #030a05;
+            --pak-green: #01411C;
+            --neon-green: #00ff66;
+            --gold: #ffd700;
+            --gold-glow: #ffae00;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            perspective: 1000px;
+        }
+
+        /* Canvas Background for Fireworks & Stars */
+        #bgCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Laser Scan Line Effect */
+        .laser-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+            box-shadow: 0 0 15px var(--neon-green);
+            top: -10px;
+            z-index: 2;
+            animation: scan 4s linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes scan {
+            0% { top: -10%; }
+            100% { top: 110%; }
+        }
+
+        /* Card Container (3D Perspective Wrapper) */
+        .card-container {
+            position: relative;
+            width: 380px;
+            height: 580px;
+            z-index: 10;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+            animation: introRotate 2.5s ease-out forwards;
+        }
+
+        @keyframes introRotate {
+            0% {
+                transform: scale(0.2) rotateY(180deg) rotateX(45deg);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1) rotateY(0deg) rotateX(0deg);
+                opacity: 1;
+            }
+        }
+
+        /* Glassmorphism Card Style */
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(1, 65, 28, 0.25);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 255, 102, 0.3);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8),
+                        0 0 30px rgba(0, 255, 102, 0.2),
+                        inset 0 0 15px rgba(255, 255, 255, 0.1);
+            transform-style: preserve-3d;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 30px 20px;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Card Opening Mechanism Overlay */
+        .card-cover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #012b12, #001107);
+            border-radius: 20px;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border: 1px solid var(--neon-green);
+            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+            transform-origin: left;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.8);
+        }
+
+        .card-cover.open {
+            transform: rotateY(-140deg);
+            pointer-events: none;
+        }
+
+        .cover-btn {
+            padding: 12px 25px;
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--gold-glow);
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 10px var(--gold); }
+            100% { transform: scale(1.08); box-shadow: 0 0 25px var(--gold); }
+        }
+
+        /* Inner Content */
+        .inner-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 5;
+            transform: translateZ(30px);
+        }
+
+        /* Animated Flag Canvas Container */
+        .flag-box {
+            width: 160px;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            position: relative;
+        }
+
+        /* Crescent & Star Glowing Effect */
+        .moon-star {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin-top: 10px;
+            filter: drop-shadow(0 0 15px var(--white)) drop-shadow(0 0 30px var(--neon-green));
+            animation: float 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        /* Minar-e-Pakistan Silhouette */
+        .minar-silhouette {
+            width: 100%;
+            height: 140px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 200" fill="%23ffffff"><path d="M45,190 L55,190 L53,150 L57,140 L55,100 L53,60 L51,20 L49,20 L47,60 L45,100 L43,140 L47,150 Z" opacity="0.15"/><path d="M48,10 L52,10 L51,0 L49,0 Z" fill="%23ffd700"/><path d="M30,200 L70,200 L65,180 L35,180 Z" opacity="0.3"/><path d="M40,180 L60,180 L58,130 L42,130 Z" opacity="0.4"/></svg>') center bottom no-repeat;
+            background-size: contain;
+            filter: drop-shadow(0 0 8px rgba(0, 255, 102, 0.6));
+            margin-bottom: -10px;
+        }
+
+        /* Golden 3D Text */
+        .gold-text-3d {
+            font-size: 1.8rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-align: center;
+            background: linear-gradient(180deg, #fff6ad 0%, #e6c619 50%, #b38b00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
+            transform: translateZ(50px);
+            letter-spacing: 1px;
+            animation: textGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes textGlow {
+            0% { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.4)); }
+            100% { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.9)); }
+        }
+
+        /* Neon Glow Name Signature */
+        .neon-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--white);
+            text-shadow: 
+                0 0 5px var(--white),
+                0 0 10px var(--neon-green),
+                0 0 20px var(--neon-green),
+                0 0 40px var(--neon-green);
+            letter-spacing: 2px;
+            transform: translateZ(40px);
+            margin-top: 5px;
+        }
+
+        /* Audio Button */
+        .audio-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 10px var(--neon-green);
+            transition: all 0.3s;
+        }
+
+        .audio-btn:hover {
+            transform: scale(1.1);
+            background: var(--neon-green);
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Dynamic Canvas -->
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- Scanning Laser Effect -->
+    <div class="laser-line"></div>
+
+    <!-- 3D Card Main Container -->
+    <div class="card-container" id="cardContainer">
+        
+        <!-- Outer Interactive Card Structure -->
+        <div class="card">
+            
+            <!-- Opening Cover / Gift Front -->
+            <div class="card-cover" id="cardCover" onclick="openCard()">
+                <div style="font-size: 3rem; margin-bottom: 20px;">🇵🇰</div>
+                <h2 style="color: var(--white); margin-bottom: 20px; text-shadow: 0 0 10px var(--neon-green);">Pakistan Rising</h2>
+                <button class="cover-btn">TAP TO OPEN 🎁</button>
+            </div>
+
+            <!-- Card Inner Glowing Content -->
+            <div class="inner-content">
+                
+                <!-- 1. Flag Section -->
+                <div class="flag-box">
+                    <svg width="100%" height="100%" viewBox="0 0 160 100">
+                        <rect width="160" height="100" fill="#01411C"/>
+                        <rect width="40" height="100" fill="#ffffff"/>
+                        <!-- Moon -->
+                        <path d="M 95 25 A 25 25 0 1 0 115 70 A 21 21 0 1 1 95 25" fill="#ffffff"/>
+                        <!-- Star -->
+                        <polygon points="108,35 111,43 119,43 113,48 115,56 108,51 101,56 103,48 97,43 105,43" fill="#ffffff"/>
+                    </svg>
+                </div>
+
+                <!-- 2. Crescent & Star Standalone Glow -->
+                <div class="moon-star">
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <path d="M 40 10 A 35 35 0 1 0 75 80 A 30 30 0 1 1 40 10" fill="#ffffff"/>
+                        <polygon points="65,25 70,37 82,37 72,45 76,57 65,49 54,57 58,45 48,37 60,37" fill="#ffd700"/>
+                    </svg>
+                </div>
+
+                <!-- 3. Minar-e-Pakistan Silhouette -->
+                <div class="minar-silhouette"></div>
+
+                <!-- 4. Golden 3D Main Wish -->
+                <div class="gold-text-3d">
+                    14 AUGUST<br>MUBARAK
+                </div>
+
+                <!-- 5. Neon Glow Signature Name -->
+                <div class="neon-name">
+                    『FC』 LEGEND
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- National Anthem Audio Toggle -->
+    <button class="audio-btn" id="audioToggle" onclick="toggleAudio()">🎵</button>
+
+    <!-- Audio Element (Pakistani National Anthem Tune/Instrumental) -->
+    <audio id="anthemAudio" loop>
+        <source src="https://upload.wikimedia.org/wikipedia/commons/2/26/Qaumi_Taranah_instrumental.ogg" type="audio/ogg">
+    </audio>
+
+    <script>
+        /* --- 1. Canvas Setup: Fireworks, Stars & Green Confetti Particles --- */
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Particle System Elements
+        const stars = [];
+        const greenParticles = [];
+        const fireworks = [];
+        const confetti = [];
+
+        // Generate Background Stars
+        for (let i = 0; i < 120; i++) {
+            stars.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                size: Math.random() * 2,
+                alpha: Math.random(),
+                speed: Math.random() * 0.02
+            });
+        }
+
+        // Generate Green Floating Intro Particles
+        for (let i = 0; i < 80; i++) {
+            greenParticles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                radius: Math.random() * 3 + 1,
+                vy: -Math.random() * 1 - 0.5,
+                alpha: Math.random() * 0.8 + 0.2
+            });
+        }
+
+        // Firework Particle Class
+        class FireworkParticle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 5 + 1;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.02 + 0.015;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.05; // gravity
+                this.alpha -= this.decay;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 2.5, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function createFirework() {
+            const x = Math.random() * width;
+            const y = Math.random() * (height * 0.5);
+            const colors = ['#00ff66', '#ffd700', '#ffffff', '#00cc44'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            for (let i = 0; i < 35; i++) {
+                fireworks.push(new FireworkParticle(x, y, color));
+            }
+        }
+
+        // Confetti Rain Effect
+        function createConfetti() {
+            if (confetti.length < 70) {
+                confetti.push({
+                    x: Math.random() * width,
+                    y: -10,
+                    size: Math.random() * 6 + 4,
+                    vy: Math.random() * 2 + 1,
+                    vx: Math.random() * 2 - 1,
+                    color: Math.random() > 0.3 ? '#00ff66' : '#ffffff',
+                    rotation: Math.random() * 360
+                });
+            }
+        }
+
+        // Animation Loop
+        let cardOpened = false;
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw Stars
+            stars.forEach(s => {
+                s.alpha += s.speed;
+                if (s.alpha > 1 || s.alpha < 0) s.speed = -s.speed;
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(s.alpha)})`;
+                ctx.fillRect(s.x, s.y, s.size, s.size);
+            });
+
+            // Draw Green Ambient Particles
+            greenParticles.forEach(p => {
+                p.y += p.vy;
+                if (p.y < 0) p.y = height;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(0, 255, 102, ${p.alpha})`;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#00ff66';
+                ctx.fill();
+            });
+
+            // Handle Fireworks (Runs continuously after opening or periodically)
+            if (cardOpened && Math.random() < 0.05) {
+                createFirework();
+            }
+            for (let i = fireworks.length - 1; i >= 0; i--) {
+                fireworks[i].update();
+                fireworks[i].draw();
+                if (fireworks[i].alpha <= 0) fireworks.splice(i, 1);
+            }
+
+            // Handle Confetti Rain
+            if (cardOpened) {
+                createConfetti();
+                for (let i = confetti.length - 1; i >= 0; i--) {
+                    let c = confetti[i];
+                    c.y += c.vy;
+                    c.x += c.vx;
+                    c.rotation += 2;
+                    ctx.save();
+                    ctx.translate(c.x, c.y);
+                    ctx.rotate((c.rotation * Math.PI) / 180);
+                    ctx.fillStyle = c.color;
+                    ctx.fillRect(-c.size/2, -c.size/2, c.size, c.size);
+                    ctx.restore();
+                    if (c.y > height) confetti.splice(i, 1);
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        /* --- 2. Interactive Mouse 3D Tilt Effect --- */
+        const cardContainer = document.getElementById('cardContainer');
+        
+        document.addEventListener('mousemove', (e) => {
+            const xAxis = (window.innerWidth / 2 - e.pageX) / 20;
+            const yAxis = (window.innerHeight / 2 - e.pageY) / 20;
+            cardContainer.style.transform = `rotateY(${-xAxis}deg) rotateX(${yAxis}deg)`;
+        });
+
+        // Touch support for Mobile
+        document.addEventListener('touchmove', (e) => {
+            if(e.touches.length > 0) {
+                const xAxis = (window.innerWidth / 2 - e.touches[0].pageX) / 20;
+                const yAxis = (window.innerHeight / 2 - e.touches[0].pageY) / 20;
+                cardContainer.style.transform = `rotateY(${-xAxis}deg) rotateX(${yAxis}deg)`;
+            }
+        });
+
+        /* --- 3. Card Open & Audio Control --- */
+        function openCard() {
+            const cover = document.getElementById('cardCover');
+            cover.classList.add('open');
+            cardOpened = true;
+
+            // Trigger extra initial fireworks outburst
+            for(let i=0; i<5; i++) {
+                setTimeout(createFirework, i * 300);
+            }
+
+            // Auto-play audio on user interaction
+            playAudio();
+        }
+
+        const audio = document.getElementById('anthemAudio');
+        const audioBtn = document.getElementById('audioToggle');
+        let isPlaying = false;
+
+        function playAudio() {
+            audio.play().then(() => {
+                isPlaying = true;
+                audioBtn.style.background = 'var(--neon-green)';
+                audioBtn.style.color = '#000';
+            }).catch(() => {
+                // Autoplay blocked by browser policy
+            });
+        }
+
+        function toggleAudio() {
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+                audioBtn.style.background = 'rgba(0,0,0,0.6)';
+                audioBtn.style.color = 'var(--neon-green)';
+            } else {
+                playAudio();
+            }
+        }
+    </script>
+</body>
+</html>
